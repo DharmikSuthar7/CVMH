@@ -73,7 +73,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         GestureDetector(
                           onTap: themeProvider.toggle,
                           child: Container(
-                            width: 42,
+                            width: 42
                             height: 42,
                             decoration: BoxDecoration(
                               color: surfaceColor,

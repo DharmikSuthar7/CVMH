@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:splitease_test/core/theme/app_theme.dart';
+import 'package:splitease_test/core/theme/laser_theme.dart';
 import 'package:splitease_test/auth/screens/intro_screen.dart';
 import 'package:splitease_test/auth/screens/login_screen.dart';
-import 'package:splitease_test/user/screens/home_screen.dart';
+import 'package:splitease_test/home/screens/laser_home_screen.dart';
 import 'package:splitease_test/user/screens/create_split_screen.dart';
 import 'package:splitease_test/admin/screens/admin_dashboard_screen.dart';
 import 'package:splitease_test/admin/screens/admin_users_screen.dart';
 import 'package:splitease_test/admin/screens/admin_splits_screen.dart';
 import 'package:splitease_test/admin/screens/admin_analytics_screen.dart';
+import 'package:splitease_test/user/screens/home_screen.dart' show ThemeProvider;
 
 void main() {
   runApp(
@@ -28,8 +29,8 @@ class SplitEaseApp extends StatelessWidget {
     return MaterialApp(
       title: 'SplitEase',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: LaserTheme.light(),
+      darkTheme: LaserTheme.dark(),
       themeMode: themeProvider.isDark ? ThemeMode.dark : ThemeMode.light,
       initialRoute: '/',
       onGenerateRoute: (settings) {
@@ -42,7 +43,7 @@ class SplitEaseApp extends StatelessWidget {
             page = const LoginScreen();
             break;
           case '/home':
-            page = const HomeScreen();
+            page = const LaserHomeScreen();
             break;
           case '/create':
             page = const CreateSplitScreen();
@@ -62,6 +63,7 @@ class SplitEaseApp extends StatelessWidget {
           default:
             page = const IntroScreen();
         }
+
         return PageRouteBuilder(
           settings: settings,
           pageBuilder: (context, animation, secondaryAnimation) => page,
@@ -69,24 +71,23 @@ class SplitEaseApp extends StatelessWidget {
             return FadeTransition(
               opacity: CurvedAnimation(
                 parent: animation,
-                curve: Curves.easeInOut,
+                curve: Curves.easeOut,
               ),
               child: SlideTransition(
-                position:
-                    Tween<Offset>(
-                      begin: const Offset(0.05, 0),
-                      end: Offset.zero,
-                    ).animate(
-                      CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeOutCubic,
-                      ),
-                    ),
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.06),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  ),
+                ),
                 child: child,
               ),
             );
           },
-          transitionDuration: const Duration(milliseconds: 280),
+          transitionDuration: const Duration(milliseconds: 320),
         );
       },
     );

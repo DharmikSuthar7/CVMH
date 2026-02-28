@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:splitease_test/core/models/dummy_data.dart';
-import 'package:splitease_test/core/theme/app_theme.dart';
-import 'package:splitease_test/shared/widgets/app_button.dart';
+import 'package:splitease_test/core/theme/laser_theme.dart';
+import 'package:splitease_test/shared/widgets/animated_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,11 +42,12 @@ class _LoginScreenState extends State<LoginScreen>
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 550),
     );
-    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
+    _fadeAnim =
+        CurvedAnimation(parent: _animController, curve: Curves.easeOut);
     _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.08),
+      begin: const Offset(0, 0.1),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
     _animController.forward();
@@ -88,13 +89,13 @@ class _LoginScreenState extends State<LoginScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: isDark
-                ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
-                : [const Color(0xFFEFF6FF), const Color(0xFFF3F4F6)],
+                ? [LaserColors.darkBg, const Color(0xFF0A1C1C)]
+                : [LaserColors.lightBg, Colors.white],
           ),
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppTheme.padding),
+            padding: const EdgeInsets.all(24),
             child: FadeTransition(
               opacity: _fadeAnim,
               child: SlideTransition(
@@ -102,40 +103,54 @@ class _LoginScreenState extends State<LoginScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 20),
-                    // Back
+                    const SizedBox(height: 10),
+
+                    // ── Back button ─────────────────────────────────────────
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
-                        width: 40,
-                        height: 40,
+                        width: 42,
+                        height: 42,
                         decoration: BoxDecoration(
                           color: isDark
-                              ? AppColors.darkSurface
-                              : AppColors.lightSurface,
-                          borderRadius: BorderRadius.circular(12),
+                              ? LaserColors.darkSurface
+                              : LaserColors.lightSurface,
+                          borderRadius: BorderRadius.circular(13),
+                          border: Border.all(
+                            color: isDark
+                                ? LaserColors.darkSurfaceVariant
+                                : LaserColors.lightSurfaceVariant,
+                          ),
                         ),
                         child: Icon(
                           Icons.arrow_back_rounded,
                           color: isDark
-                              ? AppColors.darkText
-                              : AppColors.lightText,
+                              ? LaserColors.textLight
+                              : LaserColors.lightText,
                           size: 20,
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 32),
-                    // Header
+
+                    // ── Logo row ─────────────────────────────────────────────
                     Row(
                       children: [
                         Container(
-                          width: 40,
-                          height: 40,
+                          width: 42,
+                          height: 42,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: AppColors.primaryGradient,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
+                            gradient: LaserColors.primaryLinearGradient,
+                            borderRadius: BorderRadius.circular(13),
+                            boxShadow: [
+                              BoxShadow(
+                                color: LaserColors.primary
+                                    .withValues(alpha: 0.35),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: const Icon(
                             Icons.currency_rupee_rounded,
@@ -144,25 +159,31 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          'SplitEase',
-                          style: TextStyle(
-                            color: isDark
-                                ? AppColors.darkText
-                                : AppColors.lightText,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
+                        ShaderMask(
+                          shaderCallback: (bounds) =>
+                              LaserColors.primaryLinearGradient
+                                  .createShader(bounds),
+                          child: Text(
+                            'SplitEase',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 32),
+
+                    // ── Title ────────────────────────────────────────────────
                     Text(
-                      _isSignUp ? 'Create Account' : 'Welcome Back',
+                      _isSignUp ? 'Create Account' : 'Welcome Back 👋',
                       style: TextStyle(
                         color: isDark
-                            ? AppColors.darkText
-                            : AppColors.lightText,
+                            ? LaserColors.textLight
+                            : LaserColors.lightText,
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.5,
@@ -172,30 +193,39 @@ class _LoginScreenState extends State<LoginScreen>
                     Text(
                       _isSignUp
                           ? 'Sign up to start splitting expenses'
-                          : 'Sign in to your account',
+                          : 'Sign in to your SplitEase account',
                       style: TextStyle(
                         color: isDark
-                            ? AppColors.darkSubtext
-                            : AppColors.lightSubtext,
+                            ? LaserColors.subtextLight
+                            : LaserColors.lightSubtext,
                         fontSize: 14,
                       ),
                     ),
-                    const SizedBox(height: 36),
-                    // Form
+
+                    const SizedBox(height: 32),
+
+                    // ── Form Card ────────────────────────────────────────────
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? AppColors.darkSurface
-                            : AppColors.lightSurface,
-                        borderRadius: BorderRadius.circular(
-                          AppTheme.borderRadius,
-                        ),
+                            ? LaserColors.darkCard
+                            : LaserColors.lightSurface,
+                        borderRadius: BorderRadius.circular(24),
                         border: Border.all(
                           color: isDark
-                              ? AppColors.darkSurfaceVariant
-                              : AppColors.lightSurfaceVariant,
+                              ? LaserColors.darkSurfaceVariant
+                              : LaserColors.lightSurfaceVariant,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? Colors.black.withValues(alpha: 0.3)
+                                : Colors.black.withValues(alpha: 0.06),
+                            blurRadius: 20,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
                       child: Form(
                         key: _formKey,
@@ -215,19 +245,28 @@ class _LoginScreenState extends State<LoginScreen>
                             const SizedBox(height: 14),
                             _buildPasswordField(isDark),
                             const SizedBox(height: 24),
-                            AppButton(
-                              label: _isSignUp ? 'Create Account' : 'Sign In',
-                              onPressed: _handleLogin,
+                            AnimatedAppButton(
+                              text: _isSignUp ? 'Create Account' : 'Sign In',
+                              icon: _isSignUp
+                                  ? Icons.person_add_rounded
+                                  : Icons.login_rounded,
+                              onTap: _handleLogin,
                               isLoading: _isLoading,
+                              height: 54,
+                              borderRadius: 16,
                             ),
                           ],
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 20),
+
+                    // ── Switch mode ────────────────────────────────────────
                     Center(
                       child: TextButton(
-                        onPressed: () => setState(() => _isSignUp = !_isSignUp),
+                        onPressed: () =>
+                            setState(() => _isSignUp = !_isSignUp),
                         child: RichText(
                           text: TextSpan(
                             text: _isSignUp
@@ -235,16 +274,16 @@ class _LoginScreenState extends State<LoginScreen>
                                 : "Don't have an account? ",
                             style: TextStyle(
                               color: isDark
-                                  ? AppColors.darkSubtext
-                                  : AppColors.lightSubtext,
+                                  ? LaserColors.subtextLight
+                                  : LaserColors.lightSubtext,
                               fontSize: 14,
                             ),
                             children: [
                               TextSpan(
                                 text: _isSignUp ? 'Sign In' : 'Create Account',
                                 style: const TextStyle(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
+                                  color: LaserColors.primary,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ],
@@ -266,6 +305,9 @@ class _LoginScreenState extends State<LoginScreen>
     return TextFormField(
       controller: _emailController,
       keyboardType: TextInputType.emailAddress,
+      style: TextStyle(
+        color: isDark ? LaserColors.textLight : LaserColors.lightText,
+      ),
       decoration: const InputDecoration(
         hintText: 'Email address',
         prefixIcon: Icon(Icons.mail_outline_rounded, size: 20),
@@ -282,6 +324,9 @@ class _LoginScreenState extends State<LoginScreen>
     return TextFormField(
       controller: _passwordController,
       obscureText: _obscurePassword,
+      style: TextStyle(
+        color: isDark ? LaserColors.textLight : LaserColors.lightText,
+      ),
       decoration: InputDecoration(
         hintText: 'Password',
         prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
@@ -291,8 +336,10 @@ class _LoginScreenState extends State<LoginScreen>
                 ? Icons.visibility_off_outlined
                 : Icons.visibility_outlined,
             size: 20,
+            color: LaserColors.primary,
           ),
-          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+          onPressed: () =>
+              setState(() => _obscurePassword = !_obscurePassword),
         ),
       ),
       validator: (v) =>
@@ -307,6 +354,9 @@ class _LoginScreenState extends State<LoginScreen>
     String? Function(String?)? validator,
   }) {
     return TextFormField(
+      style: TextStyle(
+        color: isDark ? LaserColors.textLight : LaserColors.lightText,
+      ),
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, size: 20),

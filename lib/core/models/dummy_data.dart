@@ -13,6 +13,9 @@ class DummyData {
       avatarInitials: 'AD',
       joinDate: DateTime(2024, 1, 1),
       totalSplits: 42,
+      isActive: true,
+      isUsingWhatsApp: true,
+      phoneNumber: '+91 90000 11111',
     ),
     UserModel(
       id: 'u1',
@@ -22,6 +25,9 @@ class DummyData {
       avatarInitials: 'DP',
       joinDate: DateTime(2024, 3, 15),
       totalSplits: 12,
+      isActive: true,
+      isUsingWhatsApp: true,
+      phoneNumber: '+91 98765 43210',
     ),
     UserModel(
       id: 'u2',
@@ -31,6 +37,9 @@ class DummyData {
       avatarInitials: 'RS',
       joinDate: DateTime(2024, 4, 20),
       totalSplits: 8,
+      isActive: false,
+      isUsingWhatsApp: true,
+      phoneNumber: '+91 88888 77777',
     ),
     UserModel(
       id: 'u3',
@@ -40,6 +49,9 @@ class DummyData {
       avatarInitials: 'AM',
       joinDate: DateTime(2024, 5, 10),
       totalSplits: 15,
+      isActive: true,
+      isUsingWhatsApp: false,
+      phoneNumber: '+91 77777 66666',
     ),
     UserModel(
       id: 'u4',
@@ -49,6 +61,9 @@ class DummyData {
       avatarInitials: 'PN',
       joinDate: DateTime(2024, 6, 5),
       totalSplits: 6,
+      isActive: true,
+      isUsingWhatsApp: false,
+      phoneNumber: '+91 66666 55555',
     ),
   ];
 
@@ -244,6 +259,11 @@ class DummyData {
 
   // ─── Admin stats ─────────────────────────────────────────────────────────
   static int get totalUsers => users.length;
+  static int get activeUsersCount => users.where((u) => u.isActive).length;
+  static int get inactiveUsersCount => users.where((u) => !u.isActive).length;
+  static int get whatsappUsersCount =>
+      users.where((u) => u.isUsingWhatsApp).length;
+
   static int get activeSplits =>
       splits.where((s) => s.status == SplitStatus.pending).length;
   static double get totalSettled => splits

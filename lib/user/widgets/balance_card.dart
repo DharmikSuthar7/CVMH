@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:splitease_test/core/theme/app_theme.dart';
+import 'package:splitease_test/core/theme/laser_theme.dart';
 
+// Updated to Laser Aqua theme - use home/widgets/glass_balance_card.dart for the new glassmorphism version
 class BalanceCard extends StatelessWidget {
   final double totalBalance;
   final double youOwe;
@@ -22,9 +23,16 @@ class BalanceCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1D4ED8), Color(0xFF2563EB), Color(0xFF3B82F6)],
+          colors: [Color(0xFF0C2B2B), Color(0xFF0A1F1F), Color(0xFF062020)],
         ),
-        borderRadius: BorderRadius.circular(AppTheme.borderRadius),
+        borderRadius: BorderRadius.circular(LaserTheme.cardRadius),
+        boxShadow: [
+          BoxShadow(
+            color: LaserColors.primary.withValues(alpha: 0.25),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,38 +40,66 @@ class BalanceCard extends StatelessWidget {
           const Text(
             'Total Balance',
             style: TextStyle(
-              color: Colors.white70,
+              color: Colors.white60,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            '₹${_format(totalBalance)}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: totalBalance),
+            duration: const Duration(milliseconds: 1400),
+            curve: Curves.easeOutCubic,
+            builder: (context2, value, child2) {
+              return ShaderMask(
+                shaderCallback: (bounds) =>
+                    LaserColors.primaryLinearGradient.createShader(bounds),
+                child: Text(
+                  '₹${_format(value)}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 34,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 22),
+          Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.white.withValues(alpha: 0.15),
+                  Colors.transparent,
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           Row(
             children: [
               Expanded(
                 child: _statColumn(
                   label: 'You Owe',
                   amount: youOwe,
-                  color: const Color(0xFFFF8A8A),
+                  color: LaserColors.accentRed,
                   icon: Icons.arrow_upward_rounded,
                 ),
               ),
-              Container(width: 1, height: 40, color: Colors.white24),
+              Container(
+                width: 1,
+                height: 40,
+                color: Colors.white12,
+              ),
               Expanded(
                 child: _statColumn(
                   label: 'You Get',
                   amount: youGet,
-                  color: const Color(0xFF86EFAC),
+                  color: LaserColors.accentGreen,
                   icon: Icons.arrow_downward_rounded,
                 ),
               ),
@@ -90,7 +126,7 @@ class BalanceCard extends StatelessWidget {
             Text(
               label,
               style: const TextStyle(
-                color: Colors.white70,
+                color: Colors.white60,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),

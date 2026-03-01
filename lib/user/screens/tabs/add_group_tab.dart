@@ -16,20 +16,6 @@ class _AddGroupTabState extends State<AddGroupTab> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
 
-  final List<String> _groupIcons = [
-    '💰',
-    '✈️',
-    '🍽️',
-    '🏠',
-    '📺',
-    '🎉',
-    '🛒',
-    '🚗',
-    '🍔',
-    '🏥',
-  ];
-  String _selectedIcon = '💰';
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -52,7 +38,6 @@ class _AddGroupTabState extends State<AddGroupTab> {
     final newGroup = GroupModel(
       id: 'g${DateTime.now().millisecondsSinceEpoch}',
       name: _nameController.text,
-      category: _selectedIcon, // using icon as category for now to be visible
       creatorId: DummyData.currentUser.id,
       createdDate: DateTime.now(),
       members: [creatorMember],
@@ -68,7 +53,6 @@ class _AddGroupTabState extends State<AddGroupTab> {
 
     // Reset form
     _nameController.clear();
-    setState(() => _selectedIcon = '💰');
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -103,62 +87,12 @@ class _AddGroupTabState extends State<AddGroupTab> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppTheme.padding),
+        padding: EdgeInsets.all(AppTheme.padding),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Group Icon',
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 60,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _groupIcons.length,
-                  itemBuilder: (context, index) {
-                    final icon = _groupIcons[index];
-                    final isSelected = _selectedIcon == icon;
-                    return GestureDetector(
-                      onTap: () => setState(() => _selectedIcon = icon),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        margin: const EdgeInsets.only(right: 12),
-                        width: 60,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.primary.withValues(alpha: 0.2)
-                              : surfaceColor,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isSelected
-                                ? AppColors.primary
-                                : (isDark
-                                      ? AppColors.darkSurfaceVariant
-                                      : AppColors.lightSurfaceVariant),
-                            width: isSelected ? 2 : 1,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            icon,
-                            style: const TextStyle(fontSize: 28),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 32),
-
               Text(
                 'Group Name',
                 style: TextStyle(
@@ -167,9 +101,9 @@ class _AddGroupTabState extends State<AddGroupTab> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: surfaceColor,
                   borderRadius: BorderRadius.circular(AppTheme.borderRadius),
@@ -189,7 +123,7 @@ class _AddGroupTabState extends State<AddGroupTab> {
                 ),
               ),
 
-              const SizedBox(height: 48),
+              SizedBox(height: 48),
 
               AppButton(label: 'Create Group', onPressed: _createGroup),
             ],

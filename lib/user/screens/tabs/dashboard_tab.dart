@@ -1,28 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:splitease_test/core/theme/app_theme.dart';
+import 'package:splitease_test/core/models/dummy_data.dart';
 
 class DashboardTab extends StatelessWidget {
   const DashboardTab({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final double totalBalance = 24450.0;
+    final double totalOwe = 12000.0;
+    final double totalGet = 6350.0;
+
+    List<Color> cardGradient;
+    if (totalOwe > totalGet) {
+      // Slight red tint
+      cardGradient = const [
+        Color(0xFF5E3535),
+        Color(0xFF4A2525),
+        Color(0xFF3A1B1B),
+        Color(0xFF291010),
+      ];
+    } else if (totalGet > totalOwe) {
+      // Slight green tint
+      cardGradient = const [
+        Color(0xFF2A5E3E),
+        Color(0xFF1C4A2D),
+        Color(0xFF133A1F),
+        Color(0xFF0A2914),
+      ];
+    } else {
+      cardGradient = const [
+        Color(0xFF1E525E),
+        Color(0xFF133F4A),
+        Color(0xFF0F323A),
+        Color(0xFF082229),
+      ];
+    }
+
+    // Mock active groups for empty state checking
+    final activeGroups = DummyData.groups
+        .where((g) => g.progressPercent < 1.0)
+        .toList();
+
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFE8F6F6,
-      ), // Base light cyan if gradient fails
+      backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
       body: Container(
-        decoration: const BoxDecoration(
-          // Full screen light aqua gradient background
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xFF45F5E4), // Bright aqua top
-              Color(0xFF9FFDF2), // Mid light aqua
-              Color(0xFFE5FFFC), // Very light
-              Color(0xFFFFFFFF), // White at the bottom
-            ],
+            colors: isDark
+                ? [
+                    AppColors.bgGradientDarkTop,
+                    AppColors.bgGradientDarkTop,
+                    AppColors.bgGradientDarkBottom,
+                    AppColors.darkBg,
+                  ]
+                : [
+                    Color.alphaBlend(
+                      AppColors.primary.withValues(alpha: 0.85),
+                      Colors.white,
+                    ),
+                    Color.alphaBlend(
+                      AppColors.primaryLight.withValues(alpha: 0.55),
+                      Colors.white,
+                    ),
+                    Color.alphaBlend(
+                      AppColors.primaryLight.withValues(alpha: 0.18),
+                      Colors.white,
+                    ),
+                    Colors.white,
+                  ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            stops: [0.0, 0.3, 0.6, 1.0],
+            stops: const [0.0, 0.3, 0.6, 1.0],
           ),
         ),
         child: SafeArea(
@@ -33,70 +84,39 @@ class DashboardTab extends StatelessWidget {
               children: [
                 // ── Top App Bar ──────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.currency_rupee_rounded,
-                              color: Color(0xFF0D2A3E),
-                              size: 18,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          const Text(
-                            'SplitEase',
-                            style: TextStyle(
-                              color: Color(0xFF0D2A3E),
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          _topIconBtn(Icons.person_outline_rounded),
-                          const SizedBox(width: 10),
-                          _topIconBtn(Icons.menu_rounded),
-                        ],
+                      Image.asset(
+                        'assets/images/app_logo.png',
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.contain,
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
                 // ── Balance Card ─────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(24),
+                    padding: EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF1E525E), // Teal-grey
-                          Color(0xFF133F4A), // Darker teal
-                          Color(0xFF0F323A), // Even darker
-                          Color(0xFF082229), // Deep dark teal/navy
-                        ],
+                      gradient: LinearGradient(
+                        colors: cardGradient,
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        stops: [0.0, 0.3, 0.7, 1.0],
+                        stops: const [0.0, 0.3, 0.7, 1.0],
                       ),
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF0B2F36).withValues(alpha: 0.3),
+                          color: cardGradient.last.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -109,7 +129,7 @@ class DashboardTab extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Balance',
                               style: TextStyle(
                                 color: Colors.white70,
@@ -125,12 +145,12 @@ class DashboardTab extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            const Text(
+                            Text(
                               '₹',
                               style: TextStyle(
                                 color: Colors.white,
@@ -138,39 +158,53 @@ class DashboardTab extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const Text(
-                              '24,450',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 40,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -1,
-                              ),
+                            TweenAnimationBuilder<double>(
+                              tween: Tween<double>(begin: 0, end: totalBalance),
+                              duration: const Duration(milliseconds: 1500),
+                              curve: Curves.easeOutCubic,
+                              builder: (context, value, child) {
+                                final formattedValue = value
+                                    .toInt()
+                                    .toString()
+                                    .replaceAllMapped(
+                                      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+                                      (Match m) => ',',
+                                    );
+                                return Text(
+                                  formattedValue,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 40,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -1,
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         Row(
                           children: [
                             _balanceStat(
                               Icons.arrow_upward_rounded,
                               'You Owe',
                               '₹12,000',
-                              const Color(0xFFE56A6A),
+                              Color(0xFFE56A6A),
                             ),
-                            const SizedBox(width: 32),
+                            SizedBox(width: 32),
                             // Divider
                             Container(
                               width: 1,
                               height: 30,
                               color: Colors.white24,
                             ),
-                            const SizedBox(width: 32),
+                            SizedBox(width: 32),
                             _balanceStat(
                               Icons.arrow_downward_rounded,
                               'You Get',
                               '₹6,350',
-                              const Color(0xFF45F5E4),
+                              Color(0xFF45F5E4),
                             ),
                           ],
                         ),
@@ -179,31 +213,38 @@ class DashboardTab extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 24), // Added spacer to prevent collision
+                SizedBox(height: 24), // Added spacer to prevent collision
                 // ── Quick Actions ─────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     children: [
                       // Premium Banner Full Width
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
+                        padding: EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 16,
                         ),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF144D59), Color(0xFF0D2A3E)],
+                          gradient: LinearGradient(
+                            colors: [
+                              Color.alphaBlend(
+                                AppColors.primary.withValues(alpha: 0.55),
+                                const Color(0xFF0D1F2D),
+                              ),
+                              Color.alphaBlend(
+                                AppColors.primary.withValues(alpha: 0.25),
+                                const Color(0xFF081520),
+                              ),
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(
-                                0xFF144D59,
-                              ).withValues(alpha: 0.3),
+                              color: AppColors.primary.withValues(alpha: 0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 6),
                             ),
@@ -212,19 +253,19 @@ class DashboardTab extends StatelessWidget {
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(10),
+                              padding: EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.15),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.workspace_premium_rounded,
-                                color: Color(0xFF45F5E4),
+                                color: AppColors.primaryLight,
                                 size: 24,
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            const Expanded(
+                            SizedBox(width: 16),
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -241,7 +282,7 @@ class DashboardTab extends StatelessWidget {
                                   Text(
                                     'Active Premium Member',
                                     style: TextStyle(
-                                      color: Color(0xFF45F5E4),
+                                      color: AppColors.primaryLight,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -249,7 +290,7 @@ class DashboardTab extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            const Icon(
+                            Icon(
                               Icons.chevron_right_rounded,
                               color: Colors.white54,
                               size: 24,
@@ -258,37 +299,49 @@ class DashboardTab extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
 
                       // Small History & Friends Options
                       Row(
                         children: [
-                          _smallAction(Icons.history_rounded, 'History'),
-                          const SizedBox(width: 16),
-                          _smallAction(Icons.group_rounded, 'Friends'),
+                          _smallAction(
+                            Icons.history_rounded,
+                            'History',
+                            isDark,
+                          ),
+                          SizedBox(width: 16),
+                          _smallAction(Icons.group_rounded, 'Friends', isDark),
                         ],
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
 
                 // ── Search Bar ────────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColors.lightSurface,
+                      color: isDark
+                          ? AppColors.darkSurface
+                          : AppColors.lightSurface,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.lightSurfaceVariant),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.darkSurfaceVariant
+                            : AppColors.lightSurfaceVariant,
+                      ),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 6,
-                    ),
-                    child: const TextField(
-                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    child: TextField(
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.darkText
+                            : AppColors.lightText,
+                        fontSize: 14,
+                      ),
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -300,7 +353,9 @@ class DashboardTab extends StatelessWidget {
                         ),
                         hintText: 'Search Groups or Persons',
                         hintStyle: TextStyle(
-                          color: Color(0xFF8EB8C8),
+                          color: isDark
+                              ? AppColors.darkSubtext
+                              : Color(0xFF8EB8C8),
                           fontSize: 14,
                         ),
                         isDense: true,
@@ -309,79 +364,67 @@ class DashboardTab extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
 
                 // ── Active Splits Header ──────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: EdgeInsets.symmetric(horizontal: 24),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Active',
                         style: TextStyle(
-                          color: Color(0xFF1D3A44),
+                          color: isDark
+                              ? AppColors.darkText
+                              : Color(0xFF1D3A44),
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      Text(
-                        'See All',
-                        style: TextStyle(
-                          color: const Color(0xFF1CB0A0),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                      if (activeGroups.isNotEmpty)
+                        Text(
+                          'See All',
+                          style: TextStyle(
+                            color: Color(0xFF1CB0A0),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // ── Active Splits List ────────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      _buildSplitTile(
-                        icon: Icons.add,
-                        title: 'Goa Trip',
-                        subtitle: '2/4 Paid',
-                        amount: '₹12.5K',
-                        iconColor: const Color(0xFF144D59),
-                        iconBg: const Color(0xFFD4EBEB),
-                      ),
-                      _buildSplitTile(
-                        icon: Icons.restaurant_rounded,
-                        title: 'Dinner',
-                        subtitle: '• Paid',
-                        amount: '₹2.4K',
-                        iconColor: const Color(0xFF1CB0A0),
-                        iconBg: const Color(0xFFE5FFFC),
-                        isSubtitleColored: true,
-                      ),
-                    ],
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: activeGroups.isEmpty
+                      ? _buildEmptyState(context, isDark)
+                      : Column(
+                          children: activeGroups.take(3).map((group) {
+                            return _buildSplitTile(
+                              icon: Icons.group_rounded,
+                              title: group.name,
+                              subtitle:
+                                  '${group.paidCount}/${group.members.length} Paid',
+                              amount: '₹${group.totalAmount.toInt()}',
+                              iconColor: Color(0xFF1CB0A0),
+                              iconBg: Color(0xFFE5FFFC),
+                              isSubtitleColored: true,
+                              isDark: isDark,
+                            );
+                          }).toList(),
+                        ),
                 ),
 
-                const SizedBox(height: 120), // Space for bottom nav
+                SizedBox(height: 120), // Space for bottom nav
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  static Widget _topIconBtn(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, color: const Color(0xFF0D2A3E), size: 18),
     );
   }
 
@@ -397,14 +440,11 @@ class DashboardTab extends StatelessWidget {
         Row(
           children: [
             Icon(icon, color: color, size: 14),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.white70, fontSize: 13),
-            ),
+            SizedBox(width: 4),
+            Text(label, style: TextStyle(color: Colors.white70, fontSize: 13)),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
@@ -417,31 +457,40 @@ class DashboardTab extends StatelessWidget {
     );
   }
 
-  static Widget _smallAction(IconData icon, String label) {
+  static Widget _smallAction(IconData icon, String label, bool isDark) {
     return Expanded(
       flex: 2,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? AppColors.darkSurface : Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? AppColors.darkSurfaceVariant : Colors.transparent,
+            width: isDark ? 1 : 0,
+          ),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
+            if (!isDark)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
           ],
         ),
         child: Column(
           children: [
-            Icon(icon, color: const Color(0xFF144D59), size: 24),
-            const SizedBox(height: 6),
+            Icon(
+              icon,
+              color: isDark ? AppColors.primary : Color(0xFF144D59),
+              size: 24,
+            ),
+            SizedBox(height: 6),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF144D59),
+              style: TextStyle(
+                color: isDark ? AppColors.darkText : Color(0xFF144D59),
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
                 height: 1.2,
@@ -461,19 +510,25 @@ class DashboardTab extends StatelessWidget {
     required Color iconColor,
     required Color iconBg,
     bool isSubtitleColored = false,
+    required bool isDark,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? AppColors.darkSurfaceVariant : Colors.transparent,
+          width: isDark ? 1 : 0,
+        ),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
         ],
       ),
       child: Row(
@@ -482,31 +537,35 @@ class DashboardTab extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: iconBg,
+              color: isDark ? AppColors.darkSurfaceVariant : iconBg,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: iconColor, size: 24),
+            child: Icon(
+              icon,
+              color: isDark ? AppColors.primary : iconColor,
+              size: 24,
+            ),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Color(0xFF1D3A44),
+                  style: TextStyle(
+                    color: isDark ? AppColors.darkText : Color(0xFF1D3A44),
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   subtitle,
                   style: TextStyle(
                     color: isSubtitleColored
-                        ? const Color(0xFF1CB0A0)
-                        : const Color(0xFF5E7A81),
+                        ? (isDark ? AppColors.primary : Color(0xFF1CB0A0))
+                        : (isDark ? AppColors.darkSubtext : Color(0xFF5E7A81)),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -519,19 +578,102 @@ class DashboardTab extends StatelessWidget {
             children: [
               Text(
                 amount,
-                style: const TextStyle(
-                  color: Color(0xFF1D3A44),
+                style: TextStyle(
+                  color: isDark ? AppColors.darkText : Color(0xFF1D3A44),
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(height: 6),
-              const Icon(
+              SizedBox(height: 6),
+              Icon(
                 Icons.more_vert_rounded,
-                color: Color(0xFF1CB0A0),
+                color: isDark ? AppColors.darkSubtext : Color(0xFF1CB0A0),
                 size: 18,
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _buildEmptyState(BuildContext context, bool isDark) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? AppColors.darkSurfaceVariant : Colors.transparent,
+          width: isDark ? 1 : 0,
+        ),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.receipt_long_rounded,
+              size: 48,
+              color: AppColors.primary,
+            ),
+          ),
+          SizedBox(height: 24),
+          Text(
+            'No expenses yet',
+            style: TextStyle(
+              color: isDark ? AppColors.darkText : Color(0xFF1D3A44),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'You haven\'t split any bills yet.\nCreate a group to get started!',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isDark ? AppColors.darkSubtext : Color(0xFF5E7A81),
+              fontSize: 14,
+              height: 1.5,
+            ),
+          ),
+          SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Navigate to create group')),
+              );
+            },
+            icon: Icon(Icons.add_rounded, size: 20, color: Colors.white),
+            label: Text(
+              'Create your first group',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+            ),
           ),
         ],
       ),
@@ -543,7 +685,7 @@ class _SparklinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF45F5E4).withValues(alpha: 0.5)
+      ..color = Color(0xFF45F5E4).withValues(alpha: 0.5)
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;

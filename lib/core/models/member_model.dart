@@ -4,6 +4,7 @@ class MemberModel {
   final String avatarInitials;
   final double amountOwed;
   final bool isPaid;
+  final String? phoneNumber; // Added for offline WhatsApp members
 
   const MemberModel({
     required this.id,
@@ -11,5 +12,6 @@ class MemberModel {
     required this.avatarInitials,
     required this.amountOwed,
     required this.isPaid,
+    this.phoneNumber,
   });
 }

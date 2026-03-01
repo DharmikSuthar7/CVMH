@@ -64,7 +64,6 @@ class DummyData {
     GroupModel(
       id: 'g1',
       name: 'Goa Trip 🏖️',
-      category: 'Travel',
       creatorId: 'u1',
       createdDate: DateTime(2026, 2, 20),
       members: [
@@ -134,7 +133,6 @@ class DummyData {
     GroupModel(
       id: 'g2',
       name: 'Flatmates 🏠',
-      category: 'Bills',
       creatorId: 'u2',
       createdDate: DateTime(2026, 2, 1),
       members: [

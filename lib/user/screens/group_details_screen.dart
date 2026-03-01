@@ -57,8 +57,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
             children: [
               TextField(
                 controller: nameCtrl,
+                readOnly: true, // Enforce contact selection
                 decoration: InputDecoration(
-                  hintText: 'Enter name',
+                  hintText: 'Select a contact to fill name',
                   hintStyle: TextStyle(color: subColor),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(
@@ -72,14 +73,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                   ),
                 ),
                 style: TextStyle(color: textColor),
-                autofocus: true,
               ),
               SizedBox(height: 16),
               TextField(
                 controller: phoneCtrl,
-                keyboardType: TextInputType.phone,
+                readOnly: true, // Enforce contact selection
                 decoration: InputDecoration(
-                  hintText: 'WhatsApp Number (Required)',
+                  hintText: 'Select a contact to fill number',
                   hintStyle: TextStyle(color: subColor),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(
@@ -91,46 +91,80 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: AppColors.primary),
                   ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      Icons.contacts_rounded,
-                      color: AppColors.primary,
-                    ),
-                    onPressed: () async {
-                      if (!kIsWeb &&
-                          (defaultTargetPlatform == TargetPlatform.iOS ||
-                              defaultTargetPlatform ==
-                                  TargetPlatform.android)) {
-                        try {
-                          if (await FlutterContacts.requestPermission()) {
-                            final contact =
-                                await FlutterContacts.openExternalPick();
-                            if (contact != null) {
-                              final fullContact =
-                                  await FlutterContacts.getContact(contact.id);
-                              if (fullContact != null &&
-                                  fullContact.phones.isNotEmpty) {
-                                nameCtrl.text = fullContact.displayName;
-                                phoneCtrl.text =
-                                    fullContact.phones.first.number;
-                              } else if (contact.phones.isNotEmpty) {
-                                nameCtrl.text = contact.displayName;
-                                phoneCtrl.text = contact.phones.first.number;
-                              } else {
-                                nameCtrl.text = contact.displayName;
-                              }
-                            }
-                          }
-                        } catch (e) {
-                          // Ignore
-                        }
-                      } else {
-                        // ignore
-                      }
-                    },
-                  ),
                 ),
                 style: TextStyle(color: textColor),
+              ),
+              SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    if (!kIsWeb &&
+                        (defaultTargetPlatform == TargetPlatform.iOS ||
+                            defaultTargetPlatform == TargetPlatform.android)) {
+                      try {
+                        if (await FlutterContacts.requestPermission()) {
+                          final contact =
+                              await FlutterContacts.openExternalPick();
+                          if (contact != null) {
+                            final fullContact =
+                                await FlutterContacts.getContact(contact.id);
+                            if (fullContact != null &&
+                                fullContact.phones.isNotEmpty) {
+                              nameCtrl.text = fullContact.displayName;
+                              phoneCtrl.text = fullContact.phones.first.number;
+                            } else if (contact.phones.isNotEmpty) {
+                              nameCtrl.text = contact.displayName;
+                              phoneCtrl.text = contact.phones.first.number;
+                            } else {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Selected contact has no phone number.',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        }
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to load contacts.')),
+                        );
+                      }
+                    } else {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Contacts not supported on this platform.',
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  icon: Icon(
+                    Icons.contacts_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  label: Text(
+                    'Select from Contacts',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -161,7 +195,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Name and WhatsApp number are required.'),
+                      content: Text('Please select a valid contact first.'),
                       backgroundColor: AppColors.error,
                     ),
                   );

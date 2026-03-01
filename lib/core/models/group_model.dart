@@ -5,17 +5,17 @@ import 'package:splitease_test/core/models/expense_model.dart';
 class GroupModel {
   final String id;
   final String name;
-  final String category; // Used for icon emoji
+  String? customImageUrl; // User can upload image later
   final String creatorId;
   final DateTime createdDate;
   final List<MemberModel> members;
   final List<ExpenseModel> expenses;
   final List<MessageModel> messages;
 
-  const GroupModel({
+  GroupModel({
     required this.id,
     required this.name,
-    required this.category,
+    this.customImageUrl,
     required this.creatorId,
     required this.createdDate,
     required this.members,

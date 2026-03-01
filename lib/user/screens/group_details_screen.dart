@@ -40,6 +40,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
     bool isDark,
   ) {
     final nameCtrl = TextEditingController();
+    final phoneCtrl = TextEditingController();
     showDialog(
       context: context,
       builder: (context) {
@@ -49,24 +50,49 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
             'Add Offline Member',
             style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
           ),
-          content: TextField(
-            controller: nameCtrl,
-            decoration: InputDecoration(
-              hintText: 'Enter name',
-              hintStyle: TextStyle(color: subColor),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: isDark
-                      ? AppColors.darkSurfaceVariant
-                      : AppColors.lightSurfaceVariant,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameCtrl,
+                decoration: InputDecoration(
+                  hintText: 'Enter name',
+                  hintStyle: TextStyle(color: subColor),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? AppColors.darkSurfaceVariant
+                          : AppColors.lightSurfaceVariant,
+                    ),
+                  ),
+                  focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.primary),
+                  ),
                 ),
+                style: TextStyle(color: textColor),
+                autofocus: true,
               ),
-              focusedBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: AppColors.primary),
+              const SizedBox(height: 16),
+              TextField(
+                controller: phoneCtrl,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  hintText: 'WhatsApp Number (Required)',
+                  hintStyle: TextStyle(color: subColor),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? AppColors.darkSurfaceVariant
+                          : AppColors.lightSurfaceVariant,
+                    ),
+                  ),
+                  focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.primary),
+                  ),
+                ),
+                style: TextStyle(color: textColor),
               ),
-            ),
-            style: TextStyle(color: textColor),
-            autofocus: true,
+            ],
           ),
           actions: [
             TextButton(
@@ -75,7 +101,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
             ),
             TextButton(
               onPressed: () {
-                if (nameCtrl.text.trim().isNotEmpty) {
+                if (nameCtrl.text.trim().isNotEmpty &&
+                    phoneCtrl.text.trim().isNotEmpty) {
                   final newMember = MemberModel(
                     id: 'm_${DateTime.now().millisecondsSinceEpoch}',
                     name: nameCtrl.text.trim(),
@@ -85,11 +112,19 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                         .toUpperCase(),
                     amountOwed: 0,
                     isPaid: true,
+                    phoneNumber: phoneCtrl.text.trim(),
                   );
                   setState(() {
                     widget.group.members.add(newMember);
                   });
                   Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Name and WhatsApp number are required.'),
+                      backgroundColor: AppColors.error,
+                    ),
+                  );
                 }
               },
               child: const Text(
@@ -268,6 +303,26 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
           ),
         ),
         actions: [
+          if (widget.group.creatorId == DummyData.currentUser.id)
+            IconButton(
+              icon: const Icon(
+                Icons.add_a_photo_outlined,
+                color: AppColors.primary,
+              ),
+              onPressed: () {
+                // Mock action for changing the group icon
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Icon updated successfully! (Mock)'),
+                    backgroundColor: AppColors.primary,
+                  ),
+                );
+                // In a real app we would pick an image and update CustomImageUrl
+                setState(() {
+                  widget.group.customImageUrl = 'https://picsum.photos/200';
+                });
+              },
+            ),
           IconButton(
             icon: const Icon(
               Icons.delete_outline_rounded,

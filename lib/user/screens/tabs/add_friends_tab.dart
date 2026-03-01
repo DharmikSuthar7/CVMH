@@ -115,17 +115,149 @@ class _AddFriendsTabState extends State<AddFriendsTab>
           ),
 
           // 3. Manual Name (Offline member) Tab
-          _buildInputTab(
+          _buildOfflineMemberTab(
             context: context,
             surfaceColor: surfaceColor,
             textColor: textColor,
             subColor: subColor,
             isDark: isDark,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOfflineMemberTab({
+    required BuildContext context,
+    required Color surfaceColor,
+    required Color textColor,
+    required Color subColor,
+    required bool isDark,
+  }) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppTheme.padding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: surfaceColor,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark
+                    ? AppColors.darkSurfaceVariant
+                    : AppColors.lightSurfaceVariant,
+              ),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.person_add_rounded,
+                    color: AppColors.primary,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Add Offline Member',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Add their name and WhatsApp number to invite them.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: subColor, fontSize: 13, height: 1.5),
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkBg : AppColors.lightBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.darkSurfaceVariant
+                          : AppColors.lightSurfaceVariant,
+                    ),
+                  ),
+                  child: TextField(
+                    controller: _nameController,
+                    keyboardType: TextInputType.name,
+                    style: TextStyle(
+                      color: textColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Full Name',
+                      hintStyle: TextStyle(color: subColor),
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkBg : AppColors.lightBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.darkSurfaceVariant
+                          : AppColors.lightSurfaceVariant,
+                    ),
+                  ),
+                  child: TextField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    style: TextStyle(
+                      color: textColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'WhatsApp Number (Required)',
+                      hintStyle: TextStyle(color: subColor),
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 48),
+          AppButton(
+            label: 'Add Friend',
             icon: Icons.person_add_rounded,
-            title: 'Add Offline Member',
-            controller: _nameController,
-            hintText: 'Full Name',
-            keyboardType: TextInputType.name,
+            onPressed: () {
+              if (_nameController.text.trim().isNotEmpty &&
+                  _phoneController.text.trim().isNotEmpty) {
+                _addFriend();
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Name and WhatsApp number are required.'),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            },
           ),
         ],
       ),

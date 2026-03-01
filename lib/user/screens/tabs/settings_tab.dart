@@ -15,6 +15,13 @@ class SettingsTab extends StatefulWidget {
 class _SettingsTabState extends State<SettingsTab> {
   // Using local state to simulate the account linking just for this prototype
   bool _isWhatsAppLinked = false;
+  late bool _requireManualInvite;
+
+  @override
+  void initState() {
+    super.initState();
+    _requireManualInvite = DummyData.currentUser.requireInviteConsent;
+  }
 
   void _openWhatsAppLinker() async {
     final result = await showModalBottomSheet<bool>(
@@ -378,6 +385,77 @@ class _SettingsTabState extends State<SettingsTab> {
                       color: AppColors.whatsapp,
                       size: 28,
                     ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Privacy Settings
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isDark
+                      ? AppColors.darkSurfaceVariant
+                      : AppColors.lightSurfaceVariant,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkBg : AppColors.lightBg,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.security_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Require Manual Invite',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'Don\'t auto-join groups',
+                          style: TextStyle(color: subColor, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: _requireManualInvite,
+                    onChanged: (val) {
+                      setState(() {
+                        _requireManualInvite = val;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            val
+                                ? 'Manual invites enabled'
+                                : 'Auto-join enabled',
+                          ),
+                          backgroundColor: AppColors.primary,
+                        ),
+                      );
+                    },
+                    activeThumbColor: AppColors.primary,
+                  ),
                 ],
               ),
             ),

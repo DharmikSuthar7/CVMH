@@ -75,13 +75,32 @@ class GroupsTab extends StatelessWidget {
                                   ? AppColors.darkBg
                                   : AppColors.lightBg,
                               borderRadius: BorderRadius.circular(14),
+                              image: group.customImageUrl != null
+                                  ? DecorationImage(
+                                      image: NetworkImage(
+                                        group.customImageUrl!,
+                                      ),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
                             ),
-                            child: Center(
-                              child: Text(
-                                _categoryEmoji(group.category),
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                            ),
+                            child: group.customImageUrl == null
+                                ? Center(
+                                    child: Text(
+                                      DummyData.users
+                                          .firstWhere(
+                                            (u) => u.id == group.creatorId,
+                                            orElse: () => DummyData.users.first,
+                                          )
+                                          .avatarInitials,
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  )
+                                : null,
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -165,20 +184,5 @@ class GroupsTab extends StatelessWidget {
               },
             ),
     );
-  }
-
-  String _categoryEmoji(String cat) {
-    switch (cat.toLowerCase()) {
-      case 'travel':
-        return '✈️';
-      case 'food':
-        return '🍽️';
-      case 'bills':
-        return '🏠';
-      case 'entertainment':
-        return '📺';
-      default:
-        return '💰';
-    }
   }
 }

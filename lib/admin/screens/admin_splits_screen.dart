@@ -140,13 +140,25 @@ class _AdminSplitsScreenState extends State<AdminSplitsScreen> {
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
+                        image: group.customImageUrl != null
+                            ? DecorationImage(
+                                image: NetworkImage(group.customImageUrl!),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
                       ),
-                      child: Center(
-                        child: Text(
-                          _emoji(group.category),
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                      ),
+                      child: group.customImageUrl == null
+                          ? Center(
+                              child: Text(
+                                creator.avatarInitials,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            )
+                          : null,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -228,20 +240,5 @@ class _AdminSplitsScreenState extends State<AdminSplitsScreen> {
         },
       ),
     );
-  }
-
-  String _emoji(String cat) {
-    switch (cat.toLowerCase()) {
-      case 'travel':
-        return '✈️';
-      case 'food':
-        return '🍽️';
-      case 'bills':
-        return '🏠';
-      case 'entertainment':
-        return '📺';
-      default:
-        return '💰';
-    }
   }
 }

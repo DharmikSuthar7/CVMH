@@ -72,33 +72,8 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildNavItem(0, Icons.home_rounded, isDark),
             _buildNavItem(1, Icons.group_rounded, isDark),
 
-            // Center Prominent + Button
-            GestureDetector(
-              onTap: () {
-                setState(() => _currentIndex = 2);
-              },
-              child: Container(
-                width: 56,
-                height: 56,
-                transform: Matrix4.translationValues(0.0, -10.0, 0.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.5),
-                      offset: const Offset(0, 6),
-                      blurRadius: 16,
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.add_rounded,
-                  color: Color(0xFF0A1628), // dark navy icon on aqua button
-                  size: 30,
-                ),
-              ),
-            ),
+            // Center Add Button made consistent
+            _buildNavItem(2, Icons.add_rounded, isDark),
 
             _buildNavItem(3, Icons.person_add_rounded, isDark),
             _buildNavItem(4, Icons.settings_rounded, isDark),
@@ -110,7 +85,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildNavItem(int index, IconData icon, bool isDark) {
     final isSelected = _currentIndex == index;
-    final color = isSelected ? AppColors.primary : AppColors.darkSubtext;
+    final color = isSelected
+        ? const Color(0xFF0A1628)
+        : AppColors.darkSubtext; // Dark navy for selected icon
 
     return GestureDetector(
       onTap: () {
@@ -118,14 +95,25 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
         width: 50,
         height: 50,
+        transform: isSelected
+            ? Matrix4.translationValues(0.0, -8.0, 0.0)
+            : Matrix4.identity(),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.12)
-              : Colors.transparent,
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.4),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                  ),
+                ]
+              : null,
         ),
         child: Icon(icon, color: color, size: 24),
       ),

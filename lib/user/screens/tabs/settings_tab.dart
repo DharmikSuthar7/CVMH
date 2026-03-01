@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:splitease_test/core/models/dummy_data.dart';
+import 'package:splitease_test/core/services/auth_service.dart';
 import 'package:splitease_test/core/theme/app_theme.dart';
 import 'package:splitease_test/shared/widgets/app_button.dart';
 import 'package:splitease_test/user/widgets/whatsapp_link_sheet.dart';
@@ -13,12 +14,24 @@ class SettingsTab extends StatefulWidget {
 }
 
 class _SettingsTabState extends State<SettingsTab> {
-  // Using local state to simulate the account linking just for this prototype
   bool _isWhatsAppLinked = false;
+  Map<String, dynamic>? _authUser;
 
   @override
   void initState() {
     super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await AuthService.getUser();
+    if (mounted) setState(() => _authUser = user);
+  }
+
+  Future<void> _logout() async {
+    await AuthService.logout();
+    if (!mounted) return;
+    Navigator.pushNamedAndRemoveUntil(context, '/', (r) => false);
   }
 
   void _openWhatsAppLinker() async {
@@ -43,7 +56,23 @@ class _SettingsTabState extends State<SettingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final user = DummyData.currentUser;
+    final dummyUser = DummyData.currentUser;
+    // Real user data from stored session; fall back to dummy while loading
+    final fullName = _authUser?['full_name'] as String? ?? dummyUser.name;
+    final email = _authUser?['email'] as String? ?? dummyUser.email;
+    final mobile = _authUser?['mobile_number'] as String? ?? '+91 98765 43210';
+    final username = _authUser?['username'] as String? ?? '';
+    // Build initials from real full name
+    final initials = fullName.trim().isNotEmpty
+        ? fullName
+              .trim()
+              .split(' ')
+              .map((w) => w[0])
+              .take(2)
+              .join()
+              .toUpperCase()
+        : 'U';
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? AppColors.darkBg : AppColors.lightBg;
     final textColor = isDark ? AppColors.darkText : AppColors.lightText;
@@ -175,7 +204,7 @@ class _SettingsTabState extends State<SettingsTab> {
                     ),
                     child: Center(
                       child: Text(
-                        user.avatarInitials,
+                        initials,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 32,
@@ -202,7 +231,7 @@ class _SettingsTabState extends State<SettingsTab> {
             ),
             SizedBox(height: 20),
             Text(
-              user.name,
+              fullName,
               style: TextStyle(
                 color: textColor,
                 fontSize: 24,
@@ -210,15 +239,22 @@ class _SettingsTabState extends State<SettingsTab> {
               ),
             ),
             SizedBox(height: 4),
+            if (username.isNotEmpty)
+              Text(
+                '@$username',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.lock_rounded, size: 12, color: subColor),
                 SizedBox(width: 4),
-                Text(
-                  user.email,
-                  style: TextStyle(color: subColor, fontSize: 13),
-                ),
+                Text(email, style: TextStyle(color: subColor, fontSize: 13)),
               ],
             ),
             SizedBox(height: 32),
@@ -241,7 +277,7 @@ class _SettingsTabState extends State<SettingsTab> {
                     isDark: isDark,
                     icon: Icons.phone_rounded,
                     label: 'Phone Number',
-                    value: '+91 98765 43210',
+                    value: mobile,
                   ),
                   Divider(
                     color: isDark
@@ -265,7 +301,7 @@ class _SettingsTabState extends State<SettingsTab> {
               children: [
                 _StatBox(
                   label: 'Total Splits',
-                  value: '${user.totalSplits}',
+                  value: '${dummyUser.totalSplits}',
                   icon: Icons.receipt_long_rounded,
                   surfaceColor: surfaceColor,
                   textColor: textColor,
@@ -275,7 +311,8 @@ class _SettingsTabState extends State<SettingsTab> {
                 SizedBox(width: 16),
                 _StatBox(
                   label: 'Joined',
-                  value: '${user.joinDate.month}/${user.joinDate.year}',
+                  value:
+                      '${dummyUser.joinDate.month}/${dummyUser.joinDate.year}',
                   icon: Icons.calendar_today_rounded,
                   surfaceColor: surfaceColor,
                   textColor: textColor,
@@ -547,8 +584,7 @@ class _SettingsTabState extends State<SettingsTab> {
               label: 'Logout',
               icon: Icons.logout_rounded,
               gradientColors: [AppColors.error],
-              onPressed: () =>
-                  Navigator.pushReplacementNamed(context, '/login'),
+              onPressed: _logout,
             ),
           ],
         ),

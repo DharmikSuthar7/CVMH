@@ -8,8 +8,14 @@ class AuthResult {
   final bool success;
   final String message;
   final Map<String, dynamic>? data;
+  final int? statusCode;
 
-  AuthResult({required this.success, required this.message, this.data});
+  AuthResult({
+    required this.success,
+    required this.message,
+    this.data,
+    this.statusCode,
+  });
 }
 
 class AuthService {
@@ -62,6 +68,16 @@ class AuthService {
     'Accept': 'application/json',
   };
 
+  /// Headers including the stored Bearer token — use for authenticated calls.
+  static Future<Map<String, String>> getAuthHeaders() async {
+    final token = await getToken();
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
+
   static Future<Map<String, dynamic>> _post(
     String path,
     Map<String, dynamic> body,
@@ -74,9 +90,15 @@ class AuthService {
             body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 15));
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      decoded['_statusCode'] = response.statusCode;
+      return decoded;
     } catch (e) {
-      return {'success': false, 'message': 'Network error. Please try again.'};
+      return {
+        'success': false,
+        'message': 'Network error. Please try again.',
+        '_statusCode': 0,
+      };
     }
   }
 
@@ -158,6 +180,7 @@ class AuthService {
       success: res['success'] == true,
       message: res['message'] ?? 'Unknown error',
       data: data,
+      statusCode: res['_statusCode'] as int?,
     );
   }
 
@@ -195,6 +218,15 @@ class AuthService {
       success: res['success'] == true,
       message: res['message'] ?? 'Unknown error',
       data: data,
+      statusCode: res['_statusCode'] as int?,
     );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Logout — clears local session
+  // ─────────────────────────────────────────────────────────────────────────
+
+  static Future<void> logout() async {
+    await clearSession();
   }
 }

@@ -177,6 +177,19 @@ class _LoginScreenState extends State<LoginScreen>
         type == 'admin' ? '/admin' : '/home',
         (r) => false,
       );
+    } else if (result.statusCode == 403) {
+      // Email not verified — take them to the OTP screen
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      Navigator.pushNamed(
+        context,
+        '/verify-otp',
+        arguments: _phoneController.text.trim(),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

@@ -3,19 +3,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppColors {
-  static String currentThemeName = 'aqua';
+  static String currentThemeName = 'purple';
 
-  // Primary Colors (Dynamic)
-  // Primary Colors (Dynamic) - Fixed "too bright" Cyan
-  static Color primary = Color(0xFF10B981); // Deeper Emerald/Cyan
-  static Color primaryLight = Color(0xFF34D399);
-  static Color primaryDark = Color(0xFF064E3B);
+  // Primary Colors (Dynamic) - Purple Default
+  static Color primary = Color(0xFFA855F7);
+  static Color primaryLight = Color(0xFFD8B4FE);
+  static Color primaryDark = Color(0xFF3B0764);
 
-  // Gradients (Dynamic)
   // Gradients (Dynamic)
   static List<Color> primaryGradient = const [
-    Color(0xFF34D399),
-    Color(0xFF10B981),
+    Color(0xFFD8B4FE),
+    Color(0xFFA855F7),
   ];
   static const List<Color> introGradient = [
     Color(0xFF031514),
@@ -285,7 +283,7 @@ class ThemeProvider extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       _isDark = prefs.getBool('isDark') ?? false;
-      final savedTheme = prefs.getString('themeName') ?? 'aqua';
+      final savedTheme = prefs.getString('themeName') ?? 'purple';
       setThemeColor(savedTheme, save: false);
     } catch (e) {
       debugPrint('Error loading theme settings: $e');
@@ -357,18 +355,17 @@ class ThemeProvider extends ChangeNotifier {
           Color(0xFFEAB308),
         ];
         break;
-      case 'aqua':
       default:
-        AppColors.primary = Color(0xFF10B981);
-        AppColors.primaryLight = Color(0xFF34D399);
-        AppColors.primaryDark = Color(0xFF064E3B);
+        // Use purple as default/fallback
+        AppColors.primary = Color(0xFFA855F7);
+        AppColors.primaryLight = Color(0xFFD8B4FE);
+        AppColors.primaryDark = Color(0xFF3B0764);
         AppColors.primaryGradient = const [
-          Color(0xFF34D399),
-          Color(0xFF10B981),
+          Color(0xFFD8B4FE),
+          Color(0xFFA855F7),
         ];
         break;
     }
-
     _updateBackgroundTints();
     if (save) _saveSettings();
     notifyListeners();

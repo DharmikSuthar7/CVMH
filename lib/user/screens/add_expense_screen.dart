@@ -158,7 +158,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           backgroundColor: AppColors.primary,
         ),
       );
-      Navigator.pop(context); // go back to group details
+      Navigator.pop(context, true); // go back with success signal
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

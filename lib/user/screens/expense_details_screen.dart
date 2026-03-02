@@ -429,14 +429,18 @@ class _ExpenseDetailsScreenState extends State<ExpenseDetailsScreen> {
         elevation: 0,
         iconTheme: IconThemeData(color: textColor),
         actions: [
-          if (widget.group.creatorId == _currentUserId)
+          if (widget.group.creatorId == _currentUserId ||
+              _expense.paidById == _currentUserId ||
+              _expense.paidById == 'me')
             IconButton(
               icon: Icon(Icons.delete_outline_rounded, color: AppColors.error),
               tooltip: 'Delete Expense Group',
               onPressed: () {
+                final messenger = ScaffoldMessenger.of(context);
+                final screenContext = context;
                 showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
+                  context: screenContext,
+                  builder: (dialogContext) => AlertDialog(
                     backgroundColor: surfaceColor,
                     title: Text(
                       'Delete Expense Group?',
@@ -451,7 +455,7 @@ class _ExpenseDetailsScreenState extends State<ExpenseDetailsScreen> {
                     ),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => Navigator.pop(dialogContext),
                         child: Text(
                           'Cancel',
                           style: TextStyle(color: textColor),
@@ -459,10 +463,9 @@ class _ExpenseDetailsScreenState extends State<ExpenseDetailsScreen> {
                       ),
                       TextButton(
                         onPressed: () async {
-                          Navigator.pop(context); // Close dialog
+                          Navigator.pop(dialogContext); // Close dialog
                           setState(() => _isLoading = true);
                           final res = await GroupService.deleteSubGroup(
-                            widget.group.id,
                             _expense.id,
                           );
 
@@ -470,10 +473,10 @@ class _ExpenseDetailsScreenState extends State<ExpenseDetailsScreen> {
                             setState(() => _isLoading = false);
                             if (res.success) {
                               Navigator.pop(
-                                context,
+                                screenContext,
                                 true,
                               ); // Go back with success
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.showSnackBar(
                                 SnackBar(
                                   content: const Text(
                                     'Expense group deleted successfully',
@@ -482,7 +485,7 @@ class _ExpenseDetailsScreenState extends State<ExpenseDetailsScreen> {
                                 ),
                               );
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.showSnackBar(
                                 SnackBar(
                                   content: Text(res.message),
                                   backgroundColor: AppColors.error,

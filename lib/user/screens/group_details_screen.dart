@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -69,8 +70,17 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
     setState(() => _isLoading = false);
 
     if (result.success && result.data != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final localIconPath = prefs.getString('group_icon_${_group.id}');
+
       setState(() {
         _group = GroupModel.fromJson(result.data!);
+        // Restore local icon if server returns null/empty but we have a valid local one
+        if ((_group.customImageUrl == null || _group.customImageUrl!.isEmpty) &&
+            localIconPath != null &&
+            File(localIconPath).existsSync()) {
+          _group.customImageUrl = localIconPath;
+        }
       });
     }
   }
@@ -127,8 +137,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
 
         final res = await GroupService.updateGroup(
           _group.id,
-          null,
-          null,
+          _group.name,
+          _group.totalExpense,
           image.path,
         );
 
@@ -353,7 +363,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
   Widget _buildExpenseTile({
     required String title,
     required String amount,
-    required String date,
     required int membersCount,
     required VoidCallback onTap,
     required bool isDark,
@@ -428,8 +437,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(date, style: TextStyle(color: subColor, fontSize: 12)),
               ],
             ),
           ],
@@ -477,11 +484,21 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                   image: _group.customImageUrl != null
                       ? DecorationImage(
                           image:
-                              _group.customImageUrl!.startsWith('http') ||
-                                  _group.customImageUrl!.startsWith('blob:')
-                              ? NetworkImage(_group.customImageUrl!)
-                              : FileImage(File(_group.customImageUrl!))
-                                    as ImageProvider,
+                              () {
+                                    final url = _group.customImageUrl!;
+                                    if (url.startsWith('http') ||
+                                        url.startsWith('blob:')) {
+                                      return NetworkImage(url);
+                                    } else if (url.startsWith('data:')) {
+                                      final base64Str = url.split(',').last;
+                                      return MemoryImage(
+                                        base64Decode(base64Str),
+                                      );
+                                    } else {
+                                      return FileImage(File(url));
+                                    }
+                                  }()
+                                  as ImageProvider,
                           fit: BoxFit.cover,
                         )
                       : null,
@@ -528,63 +545,77 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
               icon: Icon(Icons.add_a_photo_outlined, color: AppColors.primary),
               onPressed: _updateGroupIcon,
             ),
-          IconButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  backgroundColor: surfaceColor,
-                  title: Text(
-                    'Delete Group?',
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  content: Text(
-                    'Are you sure you want to delete this group? This action cannot be undone.',
-                    style: TextStyle(color: subColor),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('Cancel', style: TextStyle(color: textColor)),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        setState(() => _isLoading = true);
-                        final res = await GroupService.deleteGroup(_group.id);
-                        if (!mounted) return;
-                        setState(() => _isLoading = false);
-
-                        if (res.success) {
-                          if (!mounted) return;
-                          Navigator.pop(context); // Close dialog
-                          Navigator.pop(context); // Go back to Home
-                        } else {
-                          if (!mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(res.message),
-                              backgroundColor: AppColors.error,
-                            ),
-                          );
-                        }
-                      },
-                      child: Text(
-                        'Delete',
-                        style: TextStyle(
-                          color: AppColors.error,
-                          fontWeight: FontWeight.bold,
-                        ),
+          if (_currentUserId != null && _group.creatorId == _currentUserId)
+            IconButton(
+              onPressed: () {
+                final messenger = ScaffoldMessenger.of(context);
+                final screenContext = context;
+                showDialog(
+                  context: screenContext,
+                  builder: (dialogContext) => AlertDialog(
+                    backgroundColor: surfaceColor,
+                    title: Text(
+                      'Delete Group?',
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
-              );
-            },
-            icon: Icon(Icons.delete_outline_rounded, color: AppColors.error),
-          ),
+                    content: Text(
+                      'Are you sure you want to delete this group? This action cannot be undone.',
+                      style: TextStyle(color: subColor),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: textColor),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.pop(dialogContext); // Close dialog
+                          setState(() => _isLoading = true);
+                          final res = await GroupService.deleteGroup(_group.id);
+                          if (!mounted) return;
+                          setState(() => _isLoading = false);
+
+                          if (res.success) {
+                            if (!mounted) return;
+                            Navigator.pop(screenContext); // Go back to Home
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: const Text(
+                                  'Group deleted successfully',
+                                ),
+                                backgroundColor: AppColors.primary,
+                              ),
+                            );
+                          } else {
+                            if (!mounted) return;
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(res.message),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                          }
+                        },
+                        child: Text(
+                          'Delete',
+                          style: TextStyle(
+                            color: AppColors.error,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              icon: Icon(Icons.delete_outline_rounded, color: AppColors.error),
+            ),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -601,13 +632,16 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
       floatingActionButton: _tabController.index == 1
           ? null
           : FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => AddExpenseScreen(group: _group),
                   ),
-                ).then((_) => _refreshGroup()); // Refresh on return
+                );
+                if (result == true) {
+                  _refreshGroup();
+                }
               },
               backgroundColor: AppColors.primary,
               icon: Icon(Icons.add_rounded, color: Colors.white),
@@ -689,10 +723,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                   return _buildExpenseTile(
                     title: expense.title,
                     amount: '₹${expense.amount.toInt()}',
-                    date: '${expense.date.day}/${expense.date.month}',
                     membersCount: expense.splits.length,
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      final res = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ExpenseDetailsScreen(
@@ -701,6 +734,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                           ),
                         ),
                       );
+                      if (res == true) {
+                        _refreshGroup();
+                      }
                     },
                     isDark: isDark,
                   );

@@ -824,11 +824,6 @@ class _SettingsTabState extends State<SettingsTab> {
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 children: [
                   _ThemeCircle(
-                    name: 'aqua',
-                    colors: [Color(0xFF8DF7F0), Color(0xFF2EF2E2)],
-                    provider: themeProvider,
-                  ),
-                  _ThemeCircle(
                     name: 'purple',
                     colors: [Color(0xFFD8B4FE), Color(0xFFA855F7)],
                     provider: themeProvider,

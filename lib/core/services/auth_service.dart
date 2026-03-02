@@ -84,21 +84,20 @@ class AuthService {
     String path,
     Map<String, dynamic> body,
   ) async {
+    final uri = Uri.parse('$_baseUrl$path');
     try {
       final response = await http
-          .post(
-            Uri.parse('$_baseUrl$path'),
-            headers: _headers,
-            body: jsonEncode(body),
-          )
+          .post(uri, headers: _headers, body: jsonEncode(body))
           .timeout(const Duration(seconds: 15));
+      print('AuthService: POST $uri -> ${response.statusCode}');
       final decoded = jsonDecode(response.body) as Map<String, dynamic>;
       decoded['_statusCode'] = response.statusCode;
       return decoded;
     } catch (e) {
+      print('AuthService Error: POST $uri -> $e');
       return {
         'success': false,
-        'message': 'Network error. Please try again.',
+        'message': 'Network error ($e). Please check your connection.',
         '_statusCode': 0,
       };
     }

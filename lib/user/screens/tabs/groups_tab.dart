@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:splitease_test/core/models/group_model.dart';
 import 'package:splitease_test/core/services/group_service.dart';
 import 'package:splitease_test/core/theme/app_theme.dart';
@@ -176,18 +178,38 @@ class _GroupsTabState extends State<GroupsTab> {
                                         image: group.customImageUrl != null
                                             ? DecorationImage(
                                                 image:
-                                                    group.customImageUrl!
-                                                        .startsWith('/')
-                                                    ? FileImage(
-                                                        File(
-                                                          group.customImageUrl!,
-                                                        ),
-                                                      )
-                                                    : NetworkImage(
-                                                            group
-                                                                .customImageUrl!,
-                                                          )
-                                                          as ImageProvider,
+                                                    () {
+                                                          final url = group
+                                                              .customImageUrl!;
+                                                          if (url.startsWith(
+                                                                'http',
+                                                              ) ||
+                                                              url.startsWith(
+                                                                'blob:',
+                                                              )) {
+                                                            return NetworkImage(
+                                                              url,
+                                                            );
+                                                          } else if (url
+                                                              .startsWith(
+                                                                'data:',
+                                                              )) {
+                                                            final base64Str =
+                                                                url
+                                                                    .split(',')
+                                                                    .last;
+                                                            return MemoryImage(
+                                                              base64Decode(
+                                                                base64Str,
+                                                              ),
+                                                            );
+                                                          } else {
+                                                            return FileImage(
+                                                              File(url),
+                                                            );
+                                                          }
+                                                        }()
+                                                        as ImageProvider,
                                                 fit: BoxFit.cover,
                                               )
                                             : null,

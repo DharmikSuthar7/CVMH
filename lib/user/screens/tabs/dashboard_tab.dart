@@ -3,6 +3,7 @@ import 'package:splitease_test/core/theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:splitease_test/core/models/group_model.dart';
 import 'package:splitease_test/core/services/group_service.dart';
@@ -579,9 +580,18 @@ class _DashboardTabState extends State<DashboardTab> {
               borderRadius: BorderRadius.circular(16),
               image: imageUrl != null
                   ? DecorationImage(
-                      image: imageUrl.startsWith('http')
-                          ? NetworkImage(imageUrl)
-                          : FileImage(File(imageUrl)) as ImageProvider,
+                      image:
+                          () {
+                                if (imageUrl.startsWith('http')) {
+                                  return NetworkImage(imageUrl);
+                                } else if (imageUrl.startsWith('data:')) {
+                                  final base64Str = imageUrl.split(',').last;
+                                  return MemoryImage(base64Decode(base64Str));
+                                } else {
+                                  return FileImage(File(imageUrl));
+                                }
+                              }()
+                              as ImageProvider,
                       fit: BoxFit.cover,
                     )
                   : null,

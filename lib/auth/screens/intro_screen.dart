@@ -228,18 +228,14 @@ class _IntroScreenState extends State<IntroScreen>
             Text(
               'Get Started',
               style: TextStyle(
-                color: Color(0xFF0A1628), // dark navy on aqua
+                color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.2,
               ),
             ),
             SizedBox(width: 8),
-            Icon(
-              Icons.arrow_forward_rounded,
-              color: Color(0xFF0A1628),
-              size: 20,
-            ),
+            Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
           ],
         ),
       ),

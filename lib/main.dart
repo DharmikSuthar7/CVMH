@@ -22,7 +22,7 @@ void main() async {
   // Load theme settings before app launch
   final prefs = await SharedPreferences.getInstance();
   final initialIsDark = prefs.getBool('isDark') ?? false;
-  final initialThemeName = prefs.getString('themeName') ?? 'aqua';
+  final initialThemeName = prefs.getString('themeName') ?? 'purple';
 
   final themeProvider = ThemeProvider(
     initialIsDark: initialIsDark,
